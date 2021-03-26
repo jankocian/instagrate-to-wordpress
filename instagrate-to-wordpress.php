@@ -1,5 +1,5 @@
 <?php
-/*  
+/*
 Plugin Name: Intagrate Lite
 Plugin URI: https://intagrate.io
 Description: Plugin for automatic posting of Instagram images into a WordPress blog.
@@ -10,7 +10,7 @@ Author URI: https://polevaultweb.com/
 Copyright 2012  polevaultweb  (email : info@polevaultweb.com)
 
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License, version 2, as 
+it under the terms of the GNU General Public License, version 2, as
 published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
@@ -95,7 +95,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 				//register styles
 				wp_register_style( 'itw_style', ITW_PLUGIN_URL . 'css/style.css' );
 
-				//enqueue styles	
+				//enqueue styles
 				wp_enqueue_style( 'itw_style' );
 				wp_enqueue_style( 'dashboard' );
 				//enqueue scripts
@@ -364,7 +364,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 
 				}
 				update_option( 'itw_postcats', $cat );
-				//set post date 
+				//set post date
 				update_option( 'itw_post_date', 'now' );
 
 			}
@@ -447,6 +447,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 					}
 
 					foreach ( $ig_images as $image ):
+
 						$images[] = array(
 							"id"           => $image->id,
 							"title"        => ( isset( $image->caption ) ? self::strip_title( $image->caption ) : "" ),
@@ -454,6 +455,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 							"image_middle" => $image->media_url,
 							"image_large"  => $image->media_url,
 							"created"      => $image->timestamp,
+							"permalink"    => $image->permalink,
 						);
 
 					endforeach;
@@ -566,7 +568,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 				$debug .= "--START Auto post function START " . Date( DATE_RFC822 ) . "\n";
 				$debug .= "--Marker: " . get_transient( 'itw_posting' ) . "\n";
 
-				// Check if auto_post_process has NOT already been 
+				// Check if auto_post_process has NOT already been
 				$marker = get_transient( 'itw_posting' );
 
 				$last_run = get_option( 'itw_last_run' );
@@ -636,6 +638,8 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 										$last_id  = $images[ $i ]["id"];
 										$image_id = $images[ $i ]["id"];
 
+										$permalink = $images[ $i ]["permalink"];
+
 										//debug
 										$debug .= "----------Auto post function Ready to Post:  " . Date( DATE_RFC822 ) . "\n";
 										$debug .= "----------Title: " . $title . "\n";
@@ -656,7 +660,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 										}
 
 										//post new images to wordpress
-										$debug .= self::blog_post( $title, $image, $image_id, $post_date, $post_date_gmt );
+										$debug .= self::blog_post( $title, $image, $image_id, $post_date, $post_date_gmt, $permalink );
 
 									} else {
 
@@ -826,7 +830,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 		}
 
 		/* Posting to WordPress */
-		public static function blog_post( $post_title, $post_image, $image_id, $post_date, $post_date_gmt ) {
+		public static function blog_post( $post_title, $post_image, $image_id, $post_date, $post_date_gmt, $permalink ) {
 
 
 			$debug = "------------START Blog_post " . Date( DATE_RFC822 ) . "\n";
@@ -964,7 +968,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 
 				$customtext = stripslashes( htmlspecialchars_decode( $customtext ) );
 
-				//check if %%image%% has been used 
+				//check if %%image%% has been used
 				$pos = strpos( strtolower( $customtext ), '%%image%%' );
 				if ( $pos === false ) {
 
@@ -1009,7 +1013,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 			$debug .= "--------------START wp_insert_post " . Date( DATE_RFC822 ) . "\n";
 
 
-			//apply custom meta to make sure the image won't get duplicated 
+			//apply custom meta to make sure the image won't get duplicated
 			add_post_meta( $new_post, 'instagrate_id', $image_id );
 
 			//apply format if not standard
@@ -1023,6 +1027,9 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 				add_post_meta( $new_post, '_thumbnail_id', $attach_id );
 
 			}
+
+			add_post_meta( $new_post, 'instagram_url', $permalink );
+
 
 			// Update post with content
 			$update_post                 = array();
