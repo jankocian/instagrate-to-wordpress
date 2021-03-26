@@ -1028,11 +1028,7 @@ if ( ! class_exists( "instagrate_to_wordpress" ) ) {
 
 			}
 
-<<<<<<< HEAD
 			add_post_meta( $new_post, 'instagram_url', $permalink );
-=======
-			add_post_meta( $new_post, '_instagram_url', $permalink );
->>>>>>> 4ceee5c25d831057c5b07401fffda1892084b678
 
 
 			// Update post with content
